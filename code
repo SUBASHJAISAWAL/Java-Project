@@ -1,0 +1,135 @@
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.util.Date;
+
+public class ElectricityBill {
+
+    // ANSI Color Codes
+    static final String RESET = "\u001B[0m";
+    static final String RED = "\u001B[31m";
+    static final String GREEN = "\u001B[32m";
+    static final String YELLOW = "\u001B[33m";
+    static final String BLUE = "\u001B[34m";
+    static final String PURPLE = "\u001B[35m";
+    static final String CYAN = "\u001B[36m";
+    static final String BOLD = "\u001B[1m";
+
+    // Member Variables
+    String name;
+    int units;
+    String type;
+    double baseBill, tax, finalBill;
+    String receiptId;
+
+    // Constructor
+    ElectricityBill(String name, int units, String type, int count) {
+        this.name = name;
+        this.units = units;
+        this.type = type;
+        this.receiptId = "MTR-2026-" + (500 + count);
+    }
+
+    // Bill Calculation
+    void calculateBill() {
+        if (type.equalsIgnoreCase("household"))
+            baseBill = units * 4.0;
+        else if (type.equalsIgnoreCase("commercial"))
+            baseBill = units * 7.5;
+        else
+            baseBill = units * 2.0;
+
+        tax = baseBill * 0.05;
+        finalBill = baseBill + tax + 25.0;
+    }
+
+    // Digital Meter Display
+    void displayBill() {
+        String fUnits = String.format("%07d", units);
+        String fTotal = String.format("%.2f", finalBill);
+        String date = new Date().toString().substring(0, 10);
+
+        System.out.println(BLUE + BOLD);
+        System.out.println("          ⚡ POWER GRID CORPORATION ⚡");
+        System.out.println("      _______________________________________");
+        System.out.println("     /                                       \\");
+        System.out.println("    |   ___________________________________   |");
+        System.out.println("    |  |  _______________________________  |  |");
+        System.out.printf("    |  | |   CURRENT: %s%s kWh%s       | |  |%n",
+                GREEN, fUnits, BLUE);
+        System.out.println("    |  | |_______________________________| |  |");
+        System.out.println("    |  |___________________________________|  |");
+        System.out.printf("    |   ID    : %-26s|%n", receiptId);
+        System.out.printf("    |   USER  : %s%-26s%s|%n", CYAN, name.toUpperCase(), BLUE);
+        System.out.printf("    |   TYPE  : %s%-26s%s|%n", YELLOW, type.toUpperCase(), BLUE);
+        System.out.printf("    |   DATE  : %-26s|%n", date);
+        System.out.printf("    |   TOTAL PAYABLE: %sRS %-13s%s |%n",
+                RED + BOLD, fTotal, BLUE);
+        System.out.println("    |_________________________________________|");
+        System.out.println("             |                       |");
+        System.out.println("             |_______________________|" + RESET);
+    }
+
+    // Main Method
+    public static void main(String[] args) {
+
+        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+        double grandTotal = 0;
+
+        try {
+            System.out.print("Enter number of customers: ");
+            int no_ofUser = Integer.parseInt(br.readLine());
+
+            ElectricityBill[] users = new ElectricityBill[no_ofUser];
+
+            System.out.println(BLUE + BOLD);
+            System.out.println("==============================================");
+            System.out.println(" ⚡ ELECTRICITY BILLING MANAGEMENT SYSTEM ⚡ ");
+            System.out.println("              MINI PROJECT                   ");
+            System.out.println("==============================================" + RESET);
+
+            for (int i = 0; i < no_ofUser; i++) {
+                System.out.println(CYAN + "\n[ DATA ENTRY FOR CUSTOMER " + (i + 1) + " ]" + RESET);
+
+                System.out.print("Enter Name: ");
+                String name = br.readLine();
+
+                System.out.print("Enter Units: ");
+                int units = Integer.parseInt(br.readLine());
+
+                System.out.print("Enter Type (Household/Commercial): ");
+                String type = br.readLine();
+
+                users[i] = new ElectricityBill(name, units, type, i);
+                users[i].calculateBill();
+                grandTotal += users[i].finalBill;
+            }
+
+            System.out.println(PURPLE + "\n--- GENERATING DIGITAL BILLS ---" + RESET);
+            for (int i = 0; i < no_ofUser; i++) {
+                Thread.sleep(400);
+                users[i].displayBill();
+            }
+
+            System.out.println(BOLD + PURPLE);
+            System.out.println("\n==============================================");
+            System.out.println("             FINAL REVENUE SUMMARY            ");
+            System.out.println("==============================================" + RESET);
+
+            System.out.printf("| %-15s | %-10s | %-10s |%n", "NAME", "UNITS", "BILL(RS)");
+            System.out.println("----------------------------------------------");
+
+            for (int i = 0; i < no_ofUser; i++) {
+                System.out.printf("| %-15s | %-10d | %-10.2f |%n",
+                        users[i].name, users[i].units, users[i].finalBill);
+            }
+
+            System.out.println("----------------------------------------------");
+            System.out.printf(GREEN + BOLD +
+                    " 💰 GRAND TOTAL REVENUE : RS %.2f%n" + RESET,
+                    grandTotal);
+
+        } catch (Exception e) {
+            System.out.println(RED + "Error: Invalid Input!" + RESET);
+        }
+    }
+}
